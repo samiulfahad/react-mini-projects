@@ -1,54 +1,34 @@
+import React, { useState, useEffect, useReducer } from 'react'
 
-import React, { useState, useEffect } from 'react'
+const emailReducer = (state, action) => {
+    if (action.type === 'NEW_EMAIL') {
+        return { value: action.val, isValid: action.val.includes('@') }
+    }
+}
+const passReducer = (state, action) => {
+    if (action.type === 'NEW_PASS') {
+        return { value: action.val, isValid: action.val.length >= 5 }
+    }
+}
 
-export default function LoginForm(props) {
+const LoginForm = props => {
     const [formValidity, setFormValidity] = useState(false)
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [passwordValidity, setPasswordValidity] = useState(true)
-    const [emailValidity, setEmailValidity] = useState(true)
+    const [email, dispatchEmail] = useReducer(emailReducer, { value: '', isValid: null })
+    const [password, dispatchPass] = useReducer(passReducer, { value: '', isValid: null })
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setFormValidity(email.includes('@') && password.length > 5)
-            console.log('before cleanup');
-        }, 1000)
-        return () => {
-            clearTimeout(timer)
-            console.log('Cleanup........');
-        }
-    }, [email, password])
+        setFormValidity(email.isValid && password.isValid)
+    }, [email.isValid, password.isValid])
 
     const emailH = (e) => {
-        setEmail(e.target.value)
-        if (e.target.value.includes('@')) {
-            setEmailValidity(true)
-        }
+        dispatchEmail({ type: 'NEW_EMAIL', val: e.target.value })
     }
-
     const passwordH = (e) => {
-        setPassword(e.target.value)
-        if (e.target.value.length >= 5) {
-            setPasswordValidity(true)
-        }
+        dispatchPass({ type: 'NEW_PASS', val: e.target.value })
     }
-
-
-    const validateEmail = e => {
-        if (!e.target.value.includes('@')) {
-            setEmailValidity(false)
-        }
-    }
-    const validatePassword = e => {
-        if (e.target.value.length <= 5) {
-            setPasswordValidity(false)
-        }
-    }
-
     const loginH = e => {
         e.preventDefault()
         props.loginHandler()
-
     }
 
     return (
@@ -57,16 +37,17 @@ export default function LoginForm(props) {
                 <div className='-mt-40 text-2xl font-semibold py-8'>
                     <p>Login</p>
                 </div>
+
                 <div className='flex flex-col'>
                     <label>Email: </label>
-                    <input value={email} onChange={emailH} onBlur={validateEmail} type='text'
-                        className={`focus:outline-none px-2 rounded-lg border-2 ${emailValidity ? "border-blue-600" : "border-red-500"}`}></input>
+                    <input value={email.value} onChange={emailH} type='text'
+                        className={`focus:outline-none px-2 rounded-lg border-2 border-blue-600 ${email.isValid === false ? "border-red-500" : ""}`}></input>
                 </div>
 
                 <div className='flex flex-col'>
                     <label>Password: </label>
-                    <input value={password} onChange={passwordH} onBlur={validatePassword} id="password" type='password'
-                        className={`focus:outline-none px-2 rounded-lg border-2 ${passwordValidity ? "border-blue-600" : "border-red-500"}`}></input>
+                    <input value={password.value} onChange={passwordH} id="password" type='password'
+                        className={`focus:outline-none px-2 rounded-lg border-2 border-blue-600 ${password.isValid === false ? "border-red-500" : ""}`}></input>
                 </div>
 
                 <button type='submit' className={`mt-4 bg-blue-500 px-4 py-1 rounded text-white font-bold ${formValidity ? " " : "pointer-events-none bg-gray-300 text-black"}`}>Login</button>
@@ -75,3 +56,4 @@ export default function LoginForm(props) {
     )
 }
 
+export default LoginForm

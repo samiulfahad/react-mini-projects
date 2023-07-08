@@ -1,4 +1,4 @@
-import Project from './Project3/App'
+import Project from './FormValidation/App'
 
 function App() {
   return <Project/>

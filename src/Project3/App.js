@@ -1,36 +1,39 @@
-import React, { useState, } from 'react'
+import React, { useState, useEffect, useCallback} from 'react'
 import LoginForm from './LoginForm'
 import Dashborad from './Dashborad'
 
 
 const App = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
+    const myFunc = useCallback( () => {
+    }, [])
+    useEffect(()=>{
+        myFunc()
+        console.log('useEffect running in app comp........');
+        const loginStatus = localStorage.getItem('isLoggedIn')
+        if(loginStatus === '1'){
+            setIsLoggedIn(true)
+        }
+    }, [myFunc])
 
-    const loginH = () => {
+    const authH = () => {
         const loginStatus = localStorage.getItem('isLoggedIn')
         if (loginStatus === '1') {
-            setIsLoggedIn(false)
             localStorage.setItem('isLoggedIn', '0')
+            setIsLoggedIn(false)
             return
         }
-        setIsLoggedIn(true)
         localStorage.setItem('isLoggedIn', '1')
-
-    }
-
-    const logoutH = (e) => {
-        e.preventDefault()
-        setIsLoggedIn(false)
-        localStorage.setItem('isLoggedIn', '0')
+        setIsLoggedIn(true)
     }
 
     return (
         <React.Fragment>
             {
-                isLoggedIn && <Dashborad loginHandler={logoutH} />
+                isLoggedIn && <Dashborad loginHandler={authH} />
             }
             {
-                !isLoggedIn && <LoginForm loginHandler={loginH} />
+                !isLoggedIn && <LoginForm loginHandler={authH} />
             }
         </React.Fragment>
     )
